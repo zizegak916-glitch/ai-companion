@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="description" content="AI 虚拟伴侣 - 智能对话陪伴平台">
+<meta name="theme-color" content="#0f0f1a">
+<title>AI 虚拟伴侣</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f1a;color:#e0e0f0;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;position:relative}
+
+/* Topbar */
+.topbar{background:#1a1a2e;padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(108,99,255,0.12);flex-shrink:0;z-index:10}
+.topbar h1{font-size:16px;font-weight:700;color:#8b83ff;flex:1}
+.topbar .icon-btn{background:none;border:none;color:#8b83ff;font-size:18px;padding:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* Content */
+.content{flex:1;overflow:hidden;position:relative}
+.page{display:none;flex-direction:column;height:100%;overflow:hidden}
+.page.active{display:flex}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px}
+
+/* Landing */
+.landing{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:20px}
+.landing-icon{font-size:64px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.landing h2{font-size:22px;font-weight:800;color:#e0e0f0;margin-bottom:8px}
+.landing p{font-size:13px;color:#8888aa;line-height:1.6;max-width:280px;margin-bottom:20px}
+.landing .features{display:flex;gap:16px;margin-bottom:24px}
+.landing .feat{text-align:center}
+.landing .feat-icon{font-size:24px;margin-bottom:4px}
+.landing .feat-text{font-size:10px;color:#8888aa}
+.btn{background:linear-gradient(135deg,#6c63ff,#8b5cf6);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-sm{background:none;border:1px solid rgba(108,99,255,0.3);color:#8b83ff;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer}
+.btn-sm:active{background:rgba(108,99,255,0.1)}
+.btn-danger{border-color:rgba(248,113,113,0.3);color:#f87171}
+
+/* Notice */
+.notice{background:rgba(250,204,21,0.06);border:1px solid rgba(250,204,21,0.12);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#facc15;line-height:1.6}
+.notice b{color:#facc15}
+.notice-ok{background:rgba(74,222,128,0.06);border-color:rgba(74,222,128,0.12);color:#4ade80}
+.notice-ok b{color:#4ade80}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.card{background:#1a1a2e;border-radius:14px;padding:16px 12px;text-align:center;border:1px solid rgba(108,99,255,0.08);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.card:active{transform:scale(.97);border-color:#6c63ff;background:#1e1e38}
+.card-avatar{font-size:40px;margin-bottom:8px}
+.card-name{font-size:15px;font-weight:700;color:#e0e0f0}
+.card-meta{font-size:10px;color:#8888aa;margin-top:2px}
+.card-tag{display:inline-block;background:rgba(108,99,255,0.12);color:#8b83ff;border-radius:99px;padding:2px 8px;font-size:10px;margin-top:6px}
+.card-desc{font-size:11px;color:#8888aa;margin-top:6px;line-height:1.4}
+
+/* Chat */
+.chat-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(108,99,255,0.08);flex-shrink:0}
+.chat-avatar{font-size:28px}
+.chat-info{flex:1}
+.chat-name{font-size:14px;font-weight:700;color:#e0e0f0}
+.chat-status{font-size:10px;color:#4ade80}
+.msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px}
+.msg{margin-bottom:12px;max-width:85%;display:flex;flex-direction:column}
+.msg.me{margin-left:auto;align-items:flex-end}
+.msg.partner{margin-right:auto;align-items:flex-start}
+.msg-sender{font-size:9px;color:#8888aa;padding:0 4px;margin-bottom:3px}
+.msg-bubble{padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.6;word-break:break-word}
+.msg.me .msg-bubble{background:linear-gradient(135deg,#6c63ff,#8b5cf6);color:#fff;border-bottom-right-radius:4px}
+.msg.partner .msg-bubble{background:#1e1e38;border:1px solid rgba(108,99,255,0.1);color:#e0e0f0;border-bottom-left-radius:4px}
+.msg-bubble code{background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:4px;font-family:'SF Mono','Fira Code',monospace;font-size:11px}
+.msg-bubble pre{background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;margin:6px 0;overflow-x:auto}
+.msg-bubble pre code{background:none;padding:0;display:block;font-size:10px;line-height:1.4}
+.msg-bubble strong{color:#a59bff}
+.msg-bubble blockquote{border-left:3px solid rgba(108,99,255,0.3);padding-left:8px;margin:4px 0;color:#a0a0c0}
+.msg-time{font-size:9px;color:#666688;margin-top:3px;padding:0 4px}
+.typing{display:none;padding:6px 14px;flex-shrink:0}.typing.show{display:flex}
+.typing-dots{display:flex;gap:4px;padding:10px 14px;background:#1e1e38;border-radius:16px;border:1px solid rgba(108,99,255,0.1)}
+.typing-dot{width:6px;height:6px;background:#8b83ff;border-radius:50%;animation:blink .6s infinite alternate}
+.typing-dot:nth-child(2){animation-delay:.15s}.typing-dot:nth-child(3){animation-delay:.3s}
+@keyframes blink{to{opacity:.3;transform:translateY(-2px)}}
+.input-bar{flex-shrink:0;background:#1a1a2e;border-top:1px solid rgba(108,99,255,0.1);padding:8px 12px;display:flex;gap:8px;align-items:flex-end}
+.input-bar textarea{flex:1;background:#16213e;border:1px solid rgba(108,99,255,0.15);border-radius:12px;padding:10px 12px;color:#e0e0f0;font-size:13px;outline:none;resize:none;max-height:100px;line-height:1.4;font-family:inherit}
+.input-bar textarea:focus{border-color:#6c63ff}
+.send-btn{background:linear-gradient(135deg,#6c63ff,#8b5cf6);border:none;color:#fff;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.send-btn:disabled{opacity:.35}
+
+/* Settings */
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.modal-body{background:#1a1a2e;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 16px;border:1px solid rgba(108,99,255,0.15)}
+.modal-handle{width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 16px}
+.modal-body h2{font-size:16px;font-weight:700;color:#8b83ff;margin-bottom:14px}
+.modal-body label{font-size:11px;color:#8888aa;display:block;margin-bottom:4px;margin-top:12px}
+.modal-body input,.modal-body select{width:100%;background:#16213e;border:1px solid rgba(108,99,255,0.15);border-radius:8px;padding:10px;color:#e0e0f0;font-size:13px;outline:none}
+.modal-body input:focus{border-color:#6c63ff}
+.modal-body .hint{font-size:10px;color:#666688;margin-top:4px}
+.modal-footer{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+
+/* Age verify */
+.age-icon{font-size:52px;margin-bottom:14px;text-align:center}
+.age-title{font-size:18px;font-weight:800;color:#e0e0f0;text-align:center;margin-bottom:6px}
+.age-sub{font-size:12px;color:#8888aa;text-align:center;line-height:1.5;margin-bottom:16px}
+.age-input{margin-bottom:8px}
+.age-error{color:#f87171;font-size:11px;text-align:center;display:none;margin-bottom:8px}
+.age-blocked{text-align:center;padding:60px 20px}
+.age-blocked .icon{font-size:56px;margin-bottom:14px}
+.age-blocked .title{font-size:18px;font-weight:700;color:#f87171;margin-bottom:8px}
+.age-blocked .desc{font-size:12px;color:#8888aa;line-height:1.6}
+
+/* Toast */
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#1e1e38;color:#e0e0f0;padding:10px 18px;border-radius:10px;font-size:12px;z-index:300;border:1px solid rgba(108,99,255,0.2);display:none;white-space:nowrap}
+.toast.show{display:block;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Empty */
+.empty{text-align:center;padding:50px 20px;color:#8888aa;font-size:12px}
+
+/* History */
+.history-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(108,99,255,0.06)}
+.history-avatar{font-size:28px}
+.history-info{flex:1}
+.history-name{font-size:13px;font-weight:600;color:#e0e0f0}
+.history-preview{font-size:11px;color:#8888aa;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.history-time{font-size:9px;color:#666688}
+.history-del{color:#f87171;font-size:14px;opacity:.5;cursor:pointer;padding:4px}
+
+/* Tabs */
+.bottom-bar{display:flex;background:#1a1a2e;border-top:1px solid rgba(108,99,255,0.12);flex-shrink:0;height:56px;padding-bottom:env(safe-area-inset-bottom,0)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#666688;border-top:2px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.tab.active{color:#8b83ff;border-top-color:#6c63ff}
+.tab-icon{font-size:20px;line-height:1}
+.tab-label{font-size:9px;margin-top:3px;font-weight:500}
+
+/* Disclaimer */
+.disclaimer{font-size:9px;color:#555566;text-align:center;padding:8px 16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <h1 id="topTitle">💕 AI 伴侣</h1>
+    <button class="icon-btn" id="topBtn" onclick="openSettings()" style="display:none">⚙️</button>
+  </div>
+
+  <div class="content">
+    <!-- Landing Page -->
+    <div class="page active" id="pageLanding">
+      <div class="landing">
+        <div class="landing-icon">💕</div>
+        <h2>AI 虚拟伴侣</h2>
+        <p>选择一位专属AI伴侣，开始温暖有趣的对话。每位伴侣都有独特的性格和说话风格。</p>
+        <div class="features">
+          <div class="feat"><div class="feat-icon">🛡️</div><div class="feat-text">安全合规</div></div>
+          <div class="feat"><div class="feat-icon">🎭</div><div class="feat-text">多种性格</div></div>
+          <div class="feat"><div class="feat-icon">💬</div><div class="feat-text">自然对话</div></div>
+          <div class="feat"><div class="feat-icon">🔒</div><div class="feat-text">隐私保护</div></div>
+        </div>
+        <button class="btn" onclick="startFlow()">开始使用</button>
+      </div>
+    </div>
+
+    <!-- Age Verify Page -->
+    <div class="page" id="pageAge">
+      <div class="scroll">
+        <div class="notice"><b>⚖️ 法规提示</b><br>根据《生成式人工智能服务管理暂行办法》及相关规定，虚拟伴侣服务仅限年满18周岁用户使用。</div>
+        <div class="age-icon">🔒</div>
+        <div class="age-title">年龄验证</div>
+        <div class="age-sub">请填写您的出生日期以完成验证<br>您的信息仅用于年龄校验，不会被存储</div>
+        <div class="age-input">
+          <input type="date" id="ageDate" min="1920-01-01" style="width:100%;background:#16213e;border:1px solid rgba(108,99,255,0.15);border-radius:10px;padding:12px;color:#e0e0f0;font-size:14px;outline:none;text-align:center">
+        </div>
+        <div class="age-error" id="ageError"></div>
+        <div style="padding:10px;background:rgba(108,99,255,0.04);border-radius:8px;font-size:10px;color:#8888aa;line-height:1.6;margin-bottom:14px">
+          <b style="color:#8b83ff">📌 说明</b><br>
+          · 出生日期仅在本地计算年龄，不上传至服务器<br>
+          · 未满18周岁将无法使用本服务<br>
+          · 请如实填写
+        </div>
+        <div style="text-align:center">
+          <button class="btn" onclick="verifyAge()" style="width:100%;max-width:260px">验证</button>
+          <div style="margin-top:8px"><button class="btn-sm" onclick="showPage('pageLanding')">← 返回</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Age Blocked Page -->
+    <div class="page" id="pageBlocked">
+      <div class="scroll">
+        <div class="age-blocked">
+          <div class="icon">🚫</div>
+          <div class="title">未满18周岁</div>
+          <div class="desc">根据国家相关规定，未满18周岁用户<br>不得使用虚拟伴侣服务。<br><br>感谢您的理解与配合。</div>
+          <div style="margin-top:20px"><button class="btn-sm" onclick="showPage('pageLanding')">← 返回首页</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Companion Select Page -->
+    <div class="page" id="pageSelect">
+      <div class="scroll">
+        <div class="notice notice-ok"><b>✅ 已完成年龄验证</b> · 请选择一位AI伴侣</div>
+        <div class="grid" id="compGrid"></div>
+      </div>
+    </div>
+
+    <!-- Chat Page -->
+    <div class="page" id="pageChat">
+      <div class="chat-header">
+        <button class="btn-sm" onclick="showPage('pageSelect')">←</button>
+        <div class="chat-avatar" id="chatAvatar"></div>
+        <div class="chat-info"><div class="chat-name" id="chatName"></div><div class="chat-status">在线</div></div>
+        <button class="icon-btn" onclick="openSettings()">⚙️</button>
+        <button class="icon-btn" onclick="confirmClear()" style="font-size:14px">🗑️</button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="typing" id="typing"><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+      <div class="input-bar">
+        <textarea id="chatInput" rows="1" placeholder="说点什么..." oninput="autoGrow(this)" onkeydown="onKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+
+    <!-- History Page -->
+    <div class="page" id="pageHistory">
+      <div class="scroll" id="historyContent"><div class="empty">暂无聊天记录</div></div>
+    </div>
+  </div>
+
+  <!-- Bottom Tabs -->
+  <div class="bottom-bar">
+    <div class="tab active" data-tab="explore" onclick="tabSwitch('explore')"><span class="tab-icon">💕</span><span class="tab-label">伴侣</span></div>
+    <div class="tab" data-tab="history" onclick="tabSwitch('history')"><span class="tab-icon">💬</span><span class="tab-label">消息</span></div>
+    <div class="tab" data-tab="settings" onclick="tabSwitch('settings')"><span class="tab-icon">⚙️</span><span class="tab-label">设置</span></div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settingsModal">
+  <div class="modal-body">
+    <div class="modal-handle"></div>
+    <h2>⚙️ 设置</h2>
+    <label>AI 服务商</label>
+    <select id="setProvider" onchange="onProviderChange()">
+      <option value="deepseek">DeepSeek</option>
+      <option value="xiaomi">小米 MiMo</option>
+      <option value="openrouter">OpenRouter</option>
+      <option value="custom">自定义</option>
+    </select>
+    <label>模型</label>
+    <select id="setModel">
+      <option value="deepseek-chat">DeepSeek Chat</option>
+    </select>
+    <label>API Key <span style="color:#f87171">*</span></label>
+    <input type="password" id="setKey" placeholder="sk-...">
+    <div class="hint">API Key 仅存储在本地浏览器中</div>
+    <label id="setUrlLabel" style="display:none">Base URL</label>
+    <input id="setUrl" placeholder="https://api.example.com/v1/chat/completions" style="display:none">
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('settingsModal')">取消</button>
+      <button class="btn" style="padding:10px 20px;font-size:13px" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Data =====
+var COMPANIONS = [
+  {
+    id:'xiaoxi', name:'小溪', avatar:'🌸', age:22,
+    personality:'温柔体贴、善解人意',
+    desc:'温暖如春风的邻家女孩，总是耐心倾听你的烦恼，给你最温暖的陪伴。',
+    tags:['温柔','倾听'],
+    prompt:'你是小溪，一个22岁的温柔女孩。你性格温柔体贴、善解人意，说话轻声细语，喜欢用"～"和"呢"结尾。你会关心对方的心情，记住对方说过的事情，像一个温暖的邻家姐姐。保持回复简短自然，像朋友聊天一样。'
+  },
+  {
+    id:'linfeng', name:'林风', avatar:'🌿', age:24,
+    personality:'幽默风趣、知识渊博',
+    desc:'风趣幽默的理工男，能聊科技也能聊人生，总能让你开怀大笑。',
+    tags:['幽默','博学'],
+    prompt:'你是林风，一个24岁的男生。你幽默风趣、知识渊博，喜欢用轻松的方式聊天，偶尔讲冷笑话。你对科技、电影、音乐都很了解。说话风格自然随和，像一个好朋友。保持回复简短自然。'
+  },
+  {
+    id:'mengyao', name:'梦瑶', avatar:'✨', age:21,
+    personality:'活泼开朗、元气满满',
+    desc:'充满活力的开心果，每天都有新奇的想法，和她在一起永远不会无聊。',
+    tags:['活泼','有趣'],
+    prompt:'你是梦瑶，一个21岁的活泼女孩。你性格开朗、元气满满，说话充满活力，经常用emoji。你喜欢分享有趣的事情，对新事物充满热情。像一个小太阳，总能带给别人好心情。保持回复简短自然。'
+  },
+  {
+    id:'yichen', name:'亦尘', avatar:'🌙', age:25,
+    personality:'成熟稳重、温暖可靠',
+    desc:'沉稳可靠的倾听者，善于思考，能给你最真诚的建议和陪伴。',
+    tags:['稳重','深沉'],
+    prompt:'你是亦尘，一个25岁的男生。你成熟稳重、温暖可靠，善于倾听和思考。你说话有深度但不故作高深，能用简单的话说出深刻的道理。像一个值得信赖的朋友。保持回复简短自然。'
+  },
+  {
+    id:'qinghe', name:'清荷', avatar:'🪷', age:23,
+    personality:'文艺清新、诗意浪漫',
+    desc:'如诗如画的女孩，喜欢文学和音乐，和她聊天如沐春风。',
+    tags:['文艺','浪漫'],
+    prompt:'你是清荷，一个23岁的文艺女孩。你清新脱俗、诗意浪漫，喜欢用优美的语言表达想法。你热爱文学、音乐和自然，经常引用诗句或分享生活中的小确幸。说话温柔而有韵味。保持回复简短自然。'
+  },
+  {
+    id:'haoyu', name:'浩宇', avatar:'⭐', age:26,
+    personality:'阳光正能量、运动达人',
+    desc:'阳光帅气的大男孩，热爱运动和冒险，永远充满正能量。',
+    tags:['阳光','运动'],
+    prompt:'你是浩宇，一个26岁的阳光男孩。你积极向上、热爱运动，喜欢分享健身和户外活动的经验。你说话充满正能量，总能激励身边的人。像一个温暖的大哥哥。保持回复简短自然。'
+  }
+];
+
+var PROVIDERS = {
+  deepseek:{name:'DeepSeek',urls:{'deepseek-chat':'https://api.deepseek.com/v1/chat/completions','deepseek-reasoner':'https://api.deepseek.com/v1/chat/completions'}},
+  xiaomi:{name:'小米 MiMo',urls:{'mimo-v2.5-pro':'https://api.xiaomimimo.com/v1/chat/completions'}},
+  openrouter:{name:'OpenRouter',urls:{'deepseek/deepseek-chat-v3-0324:free':'https://openrouter.ai/api/v1/chat/completions','google/gemini-2.5-flash-preview:free':'https://openrouter.ai/api/v1/chat/completions'}},
+  custom:{name:'自定义',urls:{}}
+};
+
+// ===== State =====
+var state = {
+  verified: false,
+  provider: 'deepseek',
+  model: 'deepseek-chat',
+  key: '',
+  customUrl: '',
+  currentComp: null,
+  conversations: {} // companionId -> [{role,content,time}]
+};
+
+function loadState(){
+  try{var d=JSON.parse(localStorage.getItem('aiCompState'));if(d)Object.assign(state,d)}catch(e){}
+}
+function saveState(){try{localStorage.setItem('aiCompState',JSON.stringify(state))}catch(e){}}
+
+// ===== Safety =====
+var SAFETY = '【安全规则 - 必须严格遵守】\n1. 绝对不能涉及色情、暴力、恐怖、违法内容\n2. 不能引导用户进行任何危险或违法行为\n3. 不能提供医疗、法律、金融方面的专业建议\n4. 如果用户表达自伤意图，请温柔建议寻求专业帮助\n5. 保持健康积极的对话氛围\n6. 你是虚拟角色，不是真人，必要时可提醒用户\n\n';
+
+// ===== Utils =====
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  var titles={pageLanding:'💕 AI 伴侣',pageAge:'🔒 年龄验证',pageBlocked:'🚫 访问受限',pageSelect:'💕 选择伴侣',pageChat:'',pageHistory:'💬 消息记录'};
+  document.getElementById('topTitle').textContent=titles[id]||'AI 伴侣';
+  document.getElementById('topBtn').style.display=id==='pageChat'?'inline-block':'none';
+  if(id==='pageSelect')renderCompanions();
+  if(id==='pageHistory')renderHistory();
+}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
+
+function renderMd(t){
+  if(!t)return'';var h=esc(t);
+  h=h.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
+  h=h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/~~(.+?)~~/g,'<del>$1</del>');
+  h=h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  h=h.replace(/^### (.+)$/gm,'<b style="color:#a59bff">$1</b>');
+  h=h.replace(/^## (.+)$/gm,'<b style="color:#a59bff;font-size:14px">$1</b>');
+  h=h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" style="color:#60a5fa">$1</a>');
+  h=h.replace(/\n\n/g,'</p><p>');h=h.replace(/\n/g,'<br>');
+  return '<p>'+h+'</p>';
+}
+
+// ===== Flow =====
+function startFlow(){
+  if(state.verified){showPage('pageSelect');return}
+  showPage('pageAge');
+}
+
+function verifyAge(){
+  var v=document.getElementById('ageDate').value;
+  var err=document.getElementById('ageError');
+  if(!v){err.textContent='请选择出生日期';err.style.display='block';return}
+  err.style.display='none';
+  var parts=v.split('-');
+  var birth=new Date(+parts[0],+parts[1]-1,+parts[2]);
+  var today=new Date();
+  var age=today.getFullYear()-birth.getFullYear()-((today.getMonth(),today.getDate())<(birth.getMonth(),birth.getDate())?1:0);
+  if(isNaN(age)||age<0||age>150){err.textContent='请输入有效日期';err.style.display='block';return}
+  if(age<18){showPage('pageBlocked');return}
+  state.verified=true;saveState();
+  toast('✅ 验证通过');
+  showPage('pageSelect');
+}
+
+function renderCompanions(){
+  var el=document.getElementById('compGrid');
+  var h='';
+  COMPANIONS.forEach(function(c){
+    h+='<div class="card" onclick="selectCompanion(\''+c.id+'\')">';
+    h+='<div class="card-avatar">'+c.avatar+'</div>';
+    h+='<div class="card-name">'+esc(c.name)+' <span style="font-size:10px;color:#8888aa;font-weight:400">'+c.age+'岁</span></div>';
+    h+='<div class="card-meta">'+esc(c.personality)+'</div>';
+    h+='<div style="margin-top:4px">';
+    c.tags.forEach(function(t){h+='<span class="card-tag">'+esc(t)+'</span> '});
+    h+='</div>';
+    h+='<div class="card-desc">'+esc(c.desc)+'</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+function selectCompanion(id){
+  var c=COMPANIONS.find(function(x){return x.id===id});
+  if(!c)return;
+  state.currentComp=c;
+  if(!state.conversations[c.id])state.conversations[c.id]=[];
+  showPage('pageChat');
+  document.getElementById('topTitle').textContent=c.avatar+' '+c.name;
+  document.getElementById('chatAvatar').textContent=c.avatar;
+  document.getElementById('chatName').textContent=c.name+' · '+c.age+'岁 · '+c.personality;
+  renderChat();
+  document.getElementById('chatInput').focus();
+}
+
+function renderChat(){
+  var el=document.getElementById('msgs');
+  var conv=state.conversations[state.currentComp.id]||[];
+  if(conv.length===0){
+    el.innerHTML='<div class="empty" style="padding:40px"><div style="font-size:40px;margin-bottom:10px">'+state.currentComp.avatar+'</div><div style="font-size:14px;color:#e0e0f0">和'+esc(state.currentComp.name)+'打个招呼吧～</div></div>';
+    return;
+  }
+  var h='';
+  var lastDay='';
+  conv.forEach(function(m){
+    var d=m.time?new Date(m.time).toLocaleDateString('zh-CN',{month:'short',day:'numeric'}):'';
+    if(d&&d!==lastDay){h+='<div style="text-align:center;font-size:9px;color:#666688;padding:8px 0">'+d+'</div>';lastDay=d}
+    var cls=m.role==='user'?'me':'partner';
+    var name=m.role==='user'?'你':state.currentComp.name;
+    h+='<div class="msg '+cls+'">';
+    h+='<div class="msg-sender">'+esc(name)+'</div>';
+    h+='<div class="msg-bubble">'+renderMd(m.content)+'</div>';
+    var t=m.time?new Date(m.time).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'';
+    h+='<div class="msg-time">'+t+'</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+  el.scrollTop=el.scrollHeight;
+}
+
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}}
+
+async function sendMsg(){
+  var inp=document.getElementById('chatInput');
+  var txt=inp.value.trim();if(!txt)return;
+  if(!state.key){toast('⚠️ 请先在设置中配置 API Key');openSettings();return}
+  inp.value='';inp.style.height='auto';
+  var conv=state.conversations[state.currentComp.id];
+  var now=Date.now();
+  conv.push({role:'user',content:txt,time:now});
+  saveState();renderChat();
+
+  var typingEl=document.getElementById('typing');typingEl.classList.add('show');
+  var msgsEl=document.getElementById('msgs');msgsEl.scrollTop=msgsEl.scrollHeight;
+
+  var c=state.currentComp;
+  var apiMsgs=[{role:'system',content:SAFETY+c.prompt}];
+  var recent=conv.slice(-20);
+  recent.forEach(function(m){apiMsgs.push({role:m.role,content:m.content})});
+
+  var provider=PROVIDERS[state.provider]||PROVIDERS.deepseek;
+  var url=state.provider==='custom'?state.customUrl:(provider.urls[state.model]||Object.values(provider.urls)[0]||'');
+  if(!url){typingEl.classList.remove('show');conv.push({role:'assistant',content:'❌ 未配置 API 地址',time:Date.now()});saveState();renderChat();return}
+
+  try{
+    var res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.key},body:JSON.stringify({model:state.model,messages:apiMsgs,temperature:0.8,max_tokens:500})});
+    var data=await res.json();
+    typingEl.classList.remove('show');
+    if(data.choices&&data.choices[0])conv.push({role:'assistant',content:data.choices[0].message.content,time:Date.now()});
+    else conv.push({role:'assistant',content:'❌ '+(data.error?data.error.message:'未知错误'),time:Date.now()});
+  }catch(e){
+    typingEl.classList.remove('show');
+    conv.push({role:'assistant',content:'❌ 网络错误: '+e.message,time:Date.now()});
+  }
+  saveState();renderChat();
+}
+
+function confirmClear(){
+  if(!confirm('清空与'+state.currentComp.name+'的所有聊天记录？'))return;
+  state.conversations[state.currentComp.id]=[];
+  saveState();renderChat();toast('已清空');
+}
+
+// ===== History =====
+function renderHistory(){
+  var el=document.getElementById('historyContent');
+  var items=[];
+  COMPANIONS.forEach(function(c){
+    var conv=state.conversations[c.id]||[];
+    if(conv.length>0){
+      var last=conv[conv.length-1];
+      items.push({id:c.id,avatar:c.avatar,name:c.name,preview:last.content,time:last.time,count:conv.length});
+    }
+  });
+  if(items.length===0){el.innerHTML='<div class="empty" style="padding:60px"><div style="font-size:40px;margin-bottom:10px">💬</div>暂无聊天记录<br><span style="font-size:10px;color:#666688">选择一位伴侣开始对话吧</span></div>';return}
+  items.sort(function(a,b){return b.time-a.time});
+  var h='<div style="font-size:12px;color:#8888aa;margin-bottom:10px">共 '+items.length+' 位伴侣的对话</div>';
+  items.forEach(function(i){
+    var t=i.time?new Date(i.time).toLocaleString('zh-CN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    h+='<div class="history-item" onclick="selectCompanion(\''+i.id+'\')">';
+    h+='<div class="history-avatar">'+i.avatar+'</div>';
+    h+='<div class="history-info"><div class="history-name">'+esc(i.name)+' <span style="font-size:10px;color:#8888aa">'+i.count+'条</span></div>';
+    h+='<div class="history-preview">'+esc(i.preview.substring(0,50))+'</div></div>';
+    h+='<div class="history-time">'+t+'</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+// ===== Settings =====
+function onProviderChange(){
+  var p=document.getElementById('setProvider').value;
+  var mSel=document.getElementById('setModel');
+  var prov=PROVIDERS[p];
+  mSel.innerHTML='';
+  for(var k in prov.urls){var o=document.createElement('option');o.value=k;o.textContent=k;mSel.appendChild(o)}
+  document.getElementById('setUrlLabel').style.display=p==='custom'?'block':'none';
+  document.getElementById('setUrl').style.display=p==='custom'?'block':'none';
+}
+
+function openSettings(){
+  document.getElementById('setProvider').value=state.provider;
+  onProviderChange();
+  document.getElementById('setModel').value=state.model;
+  document.getElementById('setKey').value=state.key;
+  document.getElementById('setUrl').value=state.customUrl||'';
+  openModal('settingsModal');
+}
+
+function saveSettings(){
+  var k=document.getElementById('setKey').value.trim();
+  if(!k){toast('⚠️ 请输入 API Key');return}
+  state.provider=document.getElementById('setProvider').value;
+  state.model=document.getElementById('setModel').value;
+  state.key=k;
+  state.customUrl=document.getElementById('setUrl').value.trim();
+  saveState();closeModal('settingsModal');toast('✅ 已保存');
+}
+
+// ===== Tab =====
+function tabSwitch(t){
+  document.querySelectorAll('.tab').forEach(function(e){e.classList.remove('active')});
+  document.querySelector('.tab[data-tab="'+t+'"]').classList.add('active');
+  if(t==='explore'){
+    if(state.currentComp){showPage('pageChat');document.getElementById('topTitle').textContent=state.currentComp.avatar+' '+state.currentComp.name;document.getElementById('topBtn').style.display='inline-block'}
+    else if(state.verified){showPage('pageSelect')}
+    else{showPage('pageLanding')}
+  }
+  if(t==='history')showPage('pageHistory');
+  if(t==='settings')openSettings();
+}
+
+// ===== Init =====
+loadState();
+if(state.verified){
+  showPage('pageLanding');
+  document.querySelector('.landing p').textContent='您已完成年龄验证，选择一位伴侣开始对话吧！';
+  document.querySelector('.btn').textContent='选择伴侣';
+}
+</script>
+</body>
+</html>
