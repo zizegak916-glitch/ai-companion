@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0a0a0f">
 <title>星语 · AI伴侣</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 :root{
   --bg:#0a0a0f;--card:#12121a;--card2:#1a1a26;--border:rgba(255,255,255,0.06);
   --text:#e8e8f0;--text2:#9898b0;--text3:#5a5a72;
@@ -21,7 +21,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 ::selection{background:rgba(124,92,252,0.3)}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
 
-.app{display:flex;flex-direction:column;height:100%;max-width:520px;margin:0 auto}
+button,input,select,textarea,a{touch-action:manipulation;-webkit-appearance:none;appearance:none}
+button,[onclick]{cursor:pointer}
+.app{display:flex;flex-direction:column;height:100%;max-width:520px;margin:0 auto;position:relative}
 .topbar{padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;background:rgba(10,10,15,0.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:10}
 .topbar-title{flex:1;font-size:17px;font-weight:700;background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .topbar-sub{font-size:10px;color:var(--text3);margin-top:-2px}
@@ -43,13 +45,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .hero-stat-num{font-size:22px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-stat-label{font-size:10px;color:var(--text3);margin-top:2px}
 
-.btn{background:var(--grad);color:#fff;border:none;border-radius:14px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(124,92,252,0.3);transition:all .2s;z-index:1}
+.btn{background:var(--grad);color:#fff;border:none;border-radius:14px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(124,92,252,0.3);transition:all .2s;z-index:1;-webkit-appearance:none;appearance:none}
 .btn:active{transform:scale(0.97);box-shadow:0 2px 10px rgba(124,92,252,0.2)}
-.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);pointer-events:none}
-.btn-outline{background:transparent;border:1.5px solid rgba(124,92,252,0.4);color:var(--accent2);border-radius:12px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-outline{background:transparent;border:1.5px solid rgba(124,92,252,0.4);color:var(--accent2);border-radius:12px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;-webkit-appearance:none;appearance:none}
 .btn-outline:active{background:rgba(124,92,252,0.1)}
-.btn-ghost{background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;padding:6px}
-.btn-sm{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer}
+.btn-ghost{background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;padding:6px;-webkit-appearance:none;appearance:none}
+.btn-sm{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer;-webkit-appearance:none;appearance:none}
 
 /* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;transition:all .15s}
