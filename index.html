@@ -129,6 +129,7 @@ button{cursor:pointer}
 .tabs{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:flex;gap:7px;padding:7px;width:calc(100% - 28px);max-width:560px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.86);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(18px)}.tab{flex:1;border:0;border-radius:17px;background:transparent;color:var(--muted);font-size:12px;font-weight:950;padding:10px 6px}.tab.on{background:linear-gradient(135deg,#fff0f7,#f2efff);color:var(--brand)}
 @media(max-width:920px){.hero-grid,.chat-layout,.select-summary{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}.plans{grid-template-columns:1fr}.mobile-only{display:inline-grid!important}.side{position:fixed;left:12px;right:12px;bottom:86px;z-index:70;max-height:60vh;display:block;transform:translateY(120%);transition:transform .25s ease;box-shadow:var(--shadow);background:rgba(255,255,255,.92)}.side.open{transform:translateY(0)}.main-chat{height:calc(100vh - 136px);min-height:560px}.topbar{top:0}.hide-sm{display:none}.toolbar{flex-direction:column}.toolbar select{max-width:none}}
 @media(max-width:560px){.paywall-grid{grid-template-columns:1fr}.app{padding:10px 10px 92px}.topbar{padding:10px}.logo-mark{width:42px;height:42px}.hero,.panel{padding:17px}.hero h2{font-size:38px}.stats{grid-template-columns:1fr 1fr}.provider-grid,.model-grid,.mood-grid{grid-template-columns:1fr}.card{min-height:198px}.messages{padding:12px}.msg{max-width:88%}.chat-head{padding:10px}.brand h1{font-size:17px}.provider-pill span{display:none}}
+#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:16px 20px;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);box-shadow:0 -8px 32px rgba(82,54,142,.12);display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;animation:slideUp .4s ease}.cb-text{font-size:13px;color:var(--muted);line-height:1.6}.cb-link{color:var(--brand);cursor:pointer;text-decoration:underline;font-weight:700;font-size:13px}.cb-link:hover{color:var(--brand-2)}.cb-btn{border:0;border-radius:16px;padding:9px 22px;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 4px 16px rgba(118,87,255,.25);transition:transform .15s,box-shadow .15s}.cb-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(118,87,255,.35)}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}#privacyModal .modal-box{width:min(640px,100%);max-height:85vh;overflow:auto;padding:28px 30px;line-height:1.9;font-size:14px}#privacyModal h2{font-size:20px;font-weight:950;margin-bottom:16px;color:var(--brand)}#privacyModal h3{font-size:15px;font-weight:900;margin:18px 0 8px;color:var(--ink)}#privacyModal p,#privacyModal li{color:var(--muted);font-size:13.5px;line-height:1.85}#privacyModal ul{margin:6px 0 6px 18px}#privacyModal .close-row{text-align:right;margin-top:20px}.privacy-view-link{display:inline-block;margin-top:8px;color:var(--brand);font-size:12px;font-weight:800;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -174,6 +175,7 @@ button{cursor:pointer}
           </div>
           <button class="btn" id="verifyBtn">验证并进入</button>
           <div class="notice ok privacy-note">🛡️ 不需要任何密钥；聊天记录、自定义伴侣、心情、收藏和订阅均保存在 localStorage，可随时导出或清空。</div>
+          <span class="privacy-view-link" id="landingPrivacyLink">📄 查看隐私条款</span>
         </div>
       </div>
     </section>
@@ -719,5 +721,53 @@ function bind(){
 load();bind();setupUploadInputs();renderLandingProviders();renderFilters();renderCompanions();fillSettings();renderMood();updateStatus();
 </script>
 <script src="chat-module.js"></script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookieBanner" class="hidden" style="position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:16px 20px;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);box-shadow:0 -8px 32px rgba(82,54,142,.12);display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;animation:slideUp .4s ease">
+  <span class="cb-text">🍪 本网站使用 Cookie 和本地存储来提升您的使用体验。继续使用即表示您同意我们的 <a class="cb-link" id="privacyLinkBanner" href="javascript:void(0)">隐私条款</a></span>
+  <button class="cb-btn" id="cookieAccept">同意</button>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal" id="privacyModal">
+  <div class="modal-box glass">
+    <h2>🔒 隐私条款与数据使用说明</h2>
+
+    <h3>📦 本地存储</h3>
+    <p>所有数据（聊天记录、自定义伴侣、心情、收藏、订阅）仅存储在浏览器 localStorage 中，<strong>不会上传到任何服务器</strong>。</p>
+
+    <h3>🍪 Cookie 使用</h3>
+    <p>使用 localStorage 保存用户偏好和登录状态，<strong>不使用第三方跟踪 Cookie</strong>。</p>
+
+    <h3>💬 AI 对话</h3>
+    <p>聊天内容通过配置的 API 密钥发送至 AI 服务商，<strong>不会被应用本身存储或记录</strong>。</p>
+
+    <h3>🔐 数据安全</h3>
+    <p>可随时通过设置中的「清空数据」或浏览器清除缓存来删除所有本地数据。</p>
+
+    <h3>🎂 年龄验证</h3>
+    <p>出生日期仅用于本地年龄校验，<strong>不会上传或记录</strong>。</p>
+
+    <h3>📬 联系方式</h3>
+    <p>如有疑问，请通过 <a href="https://github.com/nicepkg" target="_blank" style="color:var(--brand);font-weight:700">GitHub Issues</a> 联系我们。</p>
+
+    <div class="close-row"><button class="btn" id="closePrivacy">关闭</button></div>
+  </div>
+</div>
+
+<script>
+// Cookie consent & privacy modal
+(function(){
+  var banner=document.getElementById('cookieBanner');
+  var privacyModal=document.getElementById('privacyModal');
+  function showPrivacy(){modal('privacyModal',true)}
+  function hideBanner(){banner.classList.add('hidden')}
+  if(!localStorage.getItem('xy_cookie_consent')){banner.classList.remove('hidden')}
+  document.getElementById('cookieAccept').addEventListener('click',function(){localStorage.setItem('xy_cookie_consent','1');hideBanner()});
+  document.getElementById('privacyLinkBanner').addEventListener('click',showPrivacy);
+  document.getElementById('landingPrivacyLink').addEventListener('click',showPrivacy);
+  document.getElementById('closePrivacy').addEventListener('click',function(){modal('privacyModal',false)});
+})();
+</script>
 </body>
 </html>
