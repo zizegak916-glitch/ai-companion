@@ -4,10 +4,10 @@
 // ============================================================
 
 const API_CONFIG = {
-  baseURL: "https://api.quickrouter.ai",
+  // 配置你的代理地址
+  baseURL: "https://your-proxy.example.com",
   path: "/v1/chat/completions",
-  apiKey: "sk-8LvGcrey8ed1N8RkWqWnHD7kO2ORDTJ2qRNeO0hquatNbJPK",
-  defaultModel: "claude-sonnet-4-6",
+  defaultModel: "deepseek-chat",
   timeout: 60000,
   systemPrefix:
     "你是星语AI伴侣中的一个角色。请用自然、亲切的中文回复，回复长度适中，像真人对话一样。禁止提及自己是AI或语言模型。\n\n角色设定：",
@@ -46,7 +46,7 @@ function isProxyConfigured() {
 
 async function streamChat(companion, history, onChunk, onDone, onError) {
   if (!isProxyConfigured()) {
-    onError("API 未配置，请检查 chat-module.js");
+    onError("请先在 chat-module.js 里配置 API_CONFIG.baseURL 代理地址");
     return;
   }
 
@@ -60,7 +60,6 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + API_CONFIG.apiKey,
       },
       body: JSON.stringify({
         model,
@@ -122,7 +121,7 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
 }
 
 async function sendMessage() {
-  const input = ;
+  const input = $("chatInput");
   const txt = input.value.trim();
   if (!txt || !S.current) return;
 
@@ -144,7 +143,7 @@ async function sendMessage() {
   renderChat();
   renderSide();
 
-  const typingEl = ;
+  const typingEl = $("typing");
   typingEl.classList.add("on");
 
   const aiMsg = { role: "assistant", text: "", time: Date.now(), streaming: true };
@@ -152,7 +151,7 @@ async function sendMessage() {
   renderChat();
 
   function getLastBubble() {
-    const bubbles = .querySelectorAll(".msg.ai .bubble");
+    const bubbles = $("messages").querySelectorAll(".msg.ai .bubble");
     return bubbles[bubbles.length - 1] || null;
   }
 
@@ -167,7 +166,7 @@ async function sendMessage() {
       const bubble = getLastBubble();
       if (bubble) {
         bubble.innerHTML = renderText(fullText) + '<span class="cursor">▍</span>';
-        const msgs = ;
+        const msgs = $("messages");
         msgs.scrollTop = msgs.scrollHeight;
       }
     },
