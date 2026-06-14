@@ -4,10 +4,10 @@
 // ============================================================
 
 const API_CONFIG = {
-  // 你的代理地址，末尾不加斜杠；示例：https://api.yourdomain.com
-  baseURL: "https://your-proxy.example.com",
+  baseURL: "https://api.quickrouter.ai",
   path: "/v1/chat/completions",
-  defaultModel: "deepseek-chat",
+  apiKey: "sk-8LvGcrey8ed1N8RkWqWnHD7kO2ORDTJ2qRNeO0hquatNbJPK",
+  defaultModel: "claude-sonnet-4-6",
   timeout: 60000,
   systemPrefix:
     "你是星语AI伴侣中的一个角色。请用自然、亲切的中文回复，回复长度适中，像真人对话一样。禁止提及自己是AI或语言模型。\n\n角色设定：",
@@ -29,7 +29,7 @@ function buildMessages(companion, history) {
   if (S.mood && S.mood.date === today()) {
     messages[0].content +=
       `\n\n用户今天的心情是「${S.mood.label}」` +
-      (S.mood.note ? `，他/她说：“${S.mood.note}”` : "") +
+      (S.mood.note ? `，他/她说："${S.mood.note}"` : "") +
       "。请在对话中自然地体现对这份心情的关注，但不要每句都提。";
   }
 
@@ -46,7 +46,7 @@ function isProxyConfigured() {
 
 async function streamChat(companion, history, onChunk, onDone, onError) {
   if (!isProxyConfigured()) {
-    onError("请先在 chat-module.js 里配置 API_CONFIG.baseURL 代理地址");
+    onError("API 未配置，请检查 chat-module.js");
     return;
   }
 
@@ -60,6 +60,7 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Bearer " + API_CONFIG.apiKey,
       },
       body: JSON.stringify({
         model,
@@ -108,7 +109,7 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
             onChunk(delta, fullText);
           }
         } catch (_) {
-          // 跳过解析失败的 SSE 行，避免单个脏包中断整段回复。
+          // 跳过解析失败的 SSE 行
         }
       }
     }
@@ -121,7 +122,7 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
 }
 
 async function sendMessage() {
-  const input = $("chatInput");
+  const input = ;
   const txt = input.value.trim();
   if (!txt || !S.current) return;
 
@@ -143,7 +144,7 @@ async function sendMessage() {
   renderChat();
   renderSide();
 
-  const typingEl = $("typing");
+  const typingEl = ;
   typingEl.classList.add("on");
 
   const aiMsg = { role: "assistant", text: "", time: Date.now(), streaming: true };
@@ -151,7 +152,7 @@ async function sendMessage() {
   renderChat();
 
   function getLastBubble() {
-    const bubbles = $("messages").querySelectorAll(".msg.ai .bubble");
+    const bubbles = .querySelectorAll(".msg.ai .bubble");
     return bubbles[bubbles.length - 1] || null;
   }
 
@@ -166,7 +167,7 @@ async function sendMessage() {
       const bubble = getLastBubble();
       if (bubble) {
         bubble.innerHTML = renderText(fullText) + '<span class="cursor">▍</span>';
-        const msgs = $("messages");
+        const msgs = ;
         msgs.scrollTop = msgs.scrollHeight;
       }
     },
