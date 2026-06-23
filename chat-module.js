@@ -1,10 +1,9 @@
 // ============================================================
-// 星语 AI 伴侣 · 聊天核心模块
+// 星语 AI Companion · 聊天核心模块
 // 后端走代理，OpenAI 兼容格式，SSE 流式
 // ============================================================
 
 const API_CONFIG = {
-  // 配置你的代理地址
   baseURL: "https://your-proxy.example.com",
   path: "/v1/chat/completions",
   defaultModel: "deepseek-chat",
@@ -26,7 +25,7 @@ function buildMessages(companion, history) {
     })),
   ];
 
-  if (S.mood && S.mood.date === today()) {
+  if (typeof S !== "undefined" && S.mood && S.mood.date === today()) {
     messages[0].content +=
       `\n\n用户今天的心情是「${S.mood.label}」` +
       (S.mood.note ? `，他/她说："${S.mood.note}"` : "") +
@@ -37,7 +36,7 @@ function buildMessages(companion, history) {
 }
 
 function resolveApiModel(companion) {
-  return (companion && (companion.apiModel || companion.model)) || S.model || API_CONFIG.defaultModel;
+  return (companion && (companion.apiModel || companion.model)) || (typeof S !== "undefined" && S.model) || API_CONFIG.defaultModel;
 }
 
 function isProxyConfigured() {
@@ -58,9 +57,7 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
   try {
     const res = await fetch(API_CONFIG.baseURL + API_CONFIG.path, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model,
         messages,
@@ -107,9 +104,7 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
             fullText += delta;
             onChunk(delta, fullText);
           }
-        } catch (_) {
-          // 跳过解析失败的 SSE 行
-        }
+        } catch (_) {}
       }
     }
 
@@ -123,19 +118,19 @@ async function streamChat(companion, history, onChunk, onDone, onError) {
 async function sendMessage() {
   const input = $("chatInput");
   const txt = input.value.trim();
-  if (!txt || !S.current) return;
-
-  const plan = activePlan();
-  if (plan.limit > 0 && S.used >= plan.limit) {
-    goSub("今日额度已用完");
-    return;
-  }
+  const pendingImage = input.dataset.pendingImage || null;
+  if ((!txt && !pendingImage) || !S.current) return;
 
   const c = allCompanions().find((x) => x.id === S.current);
   if (!c) return;
 
   const conv = S.convs[S.current] || (S.convs[S.current] = []);
-  conv.push({ role: "user", text: txt, time: Date.now() });
+  const userMsg = { role: "user", text: txt || "(发送了图片)", time: Date.now() };
+  if (pendingImage) {
+    userMsg.image = pendingImage;
+    delete input.dataset.pendingImage;
+  }
+  conv.push(userMsg);
   S.used++;
   input.value = "";
   input.style.height = "auto";
@@ -165,7 +160,7 @@ async function sendMessage() {
 
       const bubble = getLastBubble();
       if (bubble) {
-        bubble.innerHTML = renderText(fullText) + '<span class="cursor">▍</span>';
+        bubble.innerHTML = renderText(fullText) + '<span class="cursor-blink">▍</span>';
         const msgs = $("messages");
         msgs.scrollTop = msgs.scrollHeight;
       }
@@ -174,6 +169,10 @@ async function sendMessage() {
       aiMsg.text = fullText || "（本次回复为空，请稍后再试。）";
       delete aiMsg.streaming;
       typingEl.classList.remove("on");
+
+      // Increase favorability on chat
+      S.favorability[S.current] = Math.min((S.favorability[S.current] || 0) + 1, 100);
+
       save();
       renderChat();
       renderSide();
