@@ -45,6 +45,13 @@ const MODEL_META={
   'custom':{good:'跟随自定义伴侣设定',style:'由你的伴侣设定决定'}
 };
 
+const PLANS=[
+  {id:'free',name:'体验版',price:'¥0',period:'永久',limit:20,featured:false,features:['全伴侣开放','全模型可选','本地内置回复','基础聊天记录']},
+  {id:'pro',name:'星语 Pro',price:'¥19.9',period:'/月',limit:200,featured:true,features:['支持项目展示','12 位官方伴侣','全部 AI 引擎','聊天导出与收藏']},
+  {id:'inf',name:'星语 ∞',price:'¥49.9',period:'/月',limit:-1,featured:false,features:['支持项目展示','全部 Pro 文案','专属定制入口','最高优先级展示']}
+];
+const MOODS=[['开心','😊'],['疲惫','😴'],['焦虑','😵‍💫'],['平静','🌿'],['期待','✨'],['低落','🌧️'],['专注','🎧'],['想聊聊','💬']];
+
 // --- 16 Official Companions ---
 const COMPANIONS=[
   {id:'xinglan',name:'星澜',oldName:'小溪',age:22,persona:'温柔体贴、善解人意',tags:['温柔','倾听','治愈'],provider:'deepseek',model:'deepseek-chat',icon:{bg:'#ffe5f3',hair:'#c8a5e8',accent:'#ff86bd',mark:'flower',style:'long'},desc:'像春风一样记得你的细节。',prompt:'你是星澜，22岁，温柔体贴、善解人意。回复要短、自然、真诚，多关注用户情绪。'},
